@@ -62,7 +62,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>com.Main</mainClass>
+                            <mainClass>com.app.Main</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
@@ -82,7 +82,7 @@
                         <configuration>
                             <archive>
                                 <manifest>
-                                    <mainClass>com.Main</mainClass>
+                                    <mainClass>com.app.Main</mainClass>
                                 </manifest>
                             </archive>
                             <descriptorRefs>
