@@ -32,11 +32,12 @@ public class EmpruntDAO {
             stmt.setDate(4, new java.sql.Date(emprunt.getDateRetourPrevue().getTime()));
             stmt.executeUpdate();
 
-            // Obtenir l'ID généré automatiquement
-            ResultSet generatedKeys = stmt.getGeneratedKeys();
-            if (generatedKeys.next()) {
-                emprunt.setID(generatedKeys.getInt(1));
+             try (Statement stmt2 = conn.createStatement();
+             ResultSet rs = stmt2.executeQuery("SELECT last_insert_rowid() as id")) {
+            if (rs.next()) {
+                emprunt.setID(rs.getInt("id"));
             }
+        }
         }
     }
 

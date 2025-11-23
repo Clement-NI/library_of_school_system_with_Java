@@ -23,10 +23,12 @@ public class DocumentDAO {
             stmt.executeUpdate();
 
             // Obtenir l'ID généré automatiquement
-            ResultSet generatedKeys = stmt.getGeneratedKeys();
-            if (generatedKeys.next()) {
-                livre.setId(generatedKeys.getInt(1));
+           try (Statement stmt2 = conn.createStatement();
+             ResultSet rs = stmt2.executeQuery("SELECT last_insert_rowid() as id")) {
+            if (rs.next()) {
+                livre.setId(rs.getInt("id"));
             }
+        }
         }
     }
 
@@ -163,10 +165,12 @@ public class DocumentDAO {
             stmt.executeUpdate();
 
             // Obtenir l'ID généré automatiquement
-            ResultSet generatedKeys = stmt.getGeneratedKeys();
-            if (generatedKeys.next()) {
-                magazine.setId(generatedKeys.getInt(1));
+            try (Statement stmt2 = conn.createStatement();
+             ResultSet rs = stmt2.executeQuery("SELECT last_insert_rowid() as id")) {
+            if (rs.next()) {
+                magazine.setId(rs.getInt("id"));
             }
+        }
         }
     }
 

@@ -18,24 +18,24 @@ public class AdherentDAO {
      * @return
      * @throws SQLException exception de la base de données
      */
-    public Adherent ajouter(Adherent adherent) throws SQLException {
-        String sql = "INSERT INTO adherent (nom, prenom, statutPenalite) VALUES (?, ?, ?)";
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            stmt.setString(1, adherent.getNom());
-            stmt.setString(2, adherent.getPrenom());
-            stmt.setBoolean(3, adherent.getStatutPenalite());
-            stmt.executeUpdate();
+    public void ajouter(Adherent adherent) throws SQLException {
+    String sql = "INSERT INTO adherent (nom, prenom, statutPenalite) VALUES (?, ?, ?)";
 
-            // Obtenir l'ID généré automatiquement et le définir dans l'objet
-            ResultSet generatedKeys = stmt.getGeneratedKeys();
-            if (generatedKeys.next()) {
-                adherent.setID(generatedKeys.getInt(1));
+    try (Connection conn = DatabaseConnection.getConnection();
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+        stmt.setString(1, adherent.getNom());
+        stmt.setString(2, adherent.getPrenom());
+        stmt.setBoolean(3, adherent.getStatutPenalite());
+        stmt.executeUpdate();
+
+        try (Statement stmt2 = conn.createStatement();
+             ResultSet rs = stmt2.executeQuery("SELECT last_insert_rowid() as id")) {
+            if (rs.next()) {
+                adherent.setID(rs.getInt("id"));
             }
         }
-        return adherent;
     }
-
+}
     public Adherent rechercherParId(int id) throws SQLException {
         String sql = "SELECT * FROM adherent WHERE id = ?";
         try (Connection conn = DatabaseConnection.getConnection();

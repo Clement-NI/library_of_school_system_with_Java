@@ -54,7 +54,7 @@ public class DatabaseConnection {
                       "    id INTEGER PRIMARY KEY AUTOINCREMENT,\n" +
                       "    nom TEXT NOT NULL,\n" +
                       "    description TEXT,\n" +
-                      "    type TEXT NOT NULL\n" +
+                      "    type_de_document TEXT NOT NULL\n" +
                       ")"
             );
             System.out.println(" Table 'document' créée");
@@ -76,7 +76,8 @@ public class DatabaseConnection {
             conn.createStatement().execute(
                 "CREATE TABLE IF NOT EXISTS Magazine (" +
                 "  id INTEGER PRIMARY KEY AUTOINCREMENT," +
-                "  document_id INTEGER NOT NULL," +
+                        "  nom TEXT NOT NULL," +
+                "  description TEXT," +
                 "  numero INTEGER," +
                 "  periodite TEXT" +
                 ")"
@@ -87,13 +88,12 @@ public class DatabaseConnection {
             conn.createStatement().execute(
                 "CREATE TABLE IF NOT EXISTS Emprunt (" +
                 "  id INTEGER PRIMARY KEY AUTOINCREMENT," +
-                "  document TEXT NOT NULL," +
-                 " type_de_document TEXT NOT NULL," +
+                "  document_id INTEGER NOT NULL," +
+                 " type_de_document TEXT," +
                 "  adherent_id INTEGER NOT NULL," +
                 "  dateEmprunt DATE NOT NULL," +
                 "  dateRetourPrevue DATE NOT NULL," +
                 "  dateRetourReelle DATE," +
-                        "CHECK type_de_document in ('magazine', 'livre')," +
                 "  FOREIGN KEY(adherent_id) REFERENCES adherent(id)" +
                 ")"
             );
