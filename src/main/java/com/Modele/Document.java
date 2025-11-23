@@ -3,10 +3,25 @@ package com.Modele;
 public abstract class Document {
     protected String nom;
     protected String description;
+    protected int id;
+
+    public Document(int id,String nom, String description) {
+        this.id = id;
+        this.nom = nom;
+        this.description = description;
+    }
 
     public Document(String nom, String description) {
         this.nom = nom;
         this.description = description;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getNom() {
@@ -14,6 +29,13 @@ public abstract class Document {
     }
     public void setNom(String nom) {
         this.nom = nom;
+    }
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
 

@@ -3,7 +3,7 @@ package com.Modele;
 import java.util.Date;
 
 public class Emprunt {
-    private String ID_Emprunt;
+    private int ID_Emprunt;
     private Document Document;
     private Adherent adherent;
     private Date DateEmprunt;
@@ -17,7 +17,7 @@ public class Emprunt {
         this.DateRetourPrevue = RetourPrevue;
     }
 
-    public String getID_Emprunt() {
+    public int getID_Emprunt() {
         return ID_Emprunt;
     }
 
@@ -45,11 +45,13 @@ public class Emprunt {
         DateRetourReelle = dateRetourReelle;
     }
 
+    public void setID(int ID_Emprunt) {
+        this.ID_Emprunt = ID_Emprunt;
+    }
+
     public void modifyStatusAdherent(){
-        if(this.DateRetourPrevue.before(this.DateRetourReelle)){
             this.adherent.setStatut_Adherent(true);
 
-        }
     }
 
     @Override

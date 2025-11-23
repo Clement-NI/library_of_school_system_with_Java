@@ -1,31 +1,37 @@
 package com.Modele;
 
 public class Adherent {
-    private static int nextId = 1;
     private int ID_Adherent;
     private String Nom;
     private String Prenom;
     private boolean Statut_Penalite;
 
-    public Adherent(String Nom, String Prenom) {
-        this.ID_Adherent = nextId++;
+    public Adherent(int ID, String Nom, String Prenom) {
+        this.ID_Adherent = ID;
         this.Nom = Nom;
         this.Prenom = Prenom;
+        Statut_Penalite = false;
     }
 
-    public int getID_Adherent() {
+    public Adherent(String Nom, String Prenom) {
+        this.Nom = Nom;
+        this.Prenom = Prenom;
+        Statut_Penalite = false;
+    }
+
+    public int getID() {
         return ID_Adherent;
     }
 
-    public String getNom_Adherent() {
+    public String getNom() {
         return Nom;
     }
 
-    public String getPrenom_Adherent() {
+    public String getPrenom() {
         return Prenom;
     }
 
-    public boolean getStatut_Penalite() {
+    public boolean getStatutPenalite() {
         return Statut_Penalite;
     }
 
@@ -39,6 +45,10 @@ public class Adherent {
 
     public void setPrenom_Adherent(String Prenom) {
         this.Prenom = Prenom;
+    }
+
+    public void setID(int ID_Adherent) {
+        this.ID_Adherent = ID_Adherent;
     }
 
     public void setNomPrenom(String nom, String prenom) {
