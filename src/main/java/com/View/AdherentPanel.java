@@ -298,7 +298,7 @@ public class AdherentPanel extends JPanel {
     }
 
     private void afficherStats() {
-        int total = 1;
+        int total = manager.afficherLeNombredAdherents();
         String message = "Nombre total d'adhérents: " + total;
         JOptionPane.showMessageDialog(this, message,
             "Statistiques", JOptionPane.INFORMATION_MESSAGE);

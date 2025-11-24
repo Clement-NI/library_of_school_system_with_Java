@@ -114,6 +114,16 @@ public class BibliotequeManager {
         }
     }
 
+    public int afficherLeNombredAdherents(){
+        try {
+               return adherentDAO.nombreAdherent();
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+
+    }
+
 
 
     // ========== LIVRE ==========

@@ -107,4 +107,17 @@ public class AdherentDAO {
         return adherent;
     }
 
+    public int nombreAdherent() throws SQLException {
+        String sql = "SELECT COUNT(*) FROM adherent WHERE statutPenalite = false";
+        try (Connection conn = DatabaseConnection.getConnection();
+        PreparedStatement stmt = conn.prepareStatement(sql)) {
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        }
+
+        return 0;
+    }
+
 }
