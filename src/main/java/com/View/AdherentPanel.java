@@ -2,6 +2,7 @@ package com.View;
 
 import com.Controller.BibliotequeManager;
 import com.Modele.Adherent;
+import com.Modele.Emprunt;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -111,6 +112,10 @@ public class AdherentPanel extends JPanel {
         deleteButton.addActionListener(e -> supprimerAdherent());
         panel.add(deleteButton);
 
+        JButton histoButton = new JButton("Historique d'emprunt");
+        histoButton.addActionListener(e->showHistorique());
+        panel.add(histoButton);
+
         JButton refreshButton = new JButton("Rafraîchir");
         refreshButton.addActionListener(e -> refreshTable());
         panel.add(refreshButton);
@@ -187,8 +192,60 @@ public class AdherentPanel extends JPanel {
     }
 
     private void showHistorique(){
-        //Ici on essaie d'indiquer historique
+    // Vérifier qu'un adhérent est sélectionné
+    int selectedRow = table.getSelectedRow();
+    if (selectedRow == -1) {
+        JOptionPane.showMessageDialog(this, "Veuillez sélectionner un adhérent",
+            "Erreur", JOptionPane.ERROR_MESSAGE);
+        return;
     }
+
+    // Récupérer l'ID de l'adhérent sélectionné
+    int id = (int) tableModel.getValueAt(selectedRow, 0);
+
+    // Obtenir les emprunts de l'adhérent
+    ArrayList<Emprunt> emprunts = manager.obtenirEmpruntsAdherent(id);
+
+    // Créer un nouveau modèle de table pour l'historique
+    DefaultTableModel historiqueTableModel = new DefaultTableModel(
+        new String[]{"ID Emprunt", "Document", "Date Emprunt", "Date Retour Prevue", "Date Retour Relle"}, 0
+    ) {
+        @Override
+        public boolean isCellEditable(int row, int column) {
+            return false;
+        }
+    };
+
+    // Remplir le modèle avec les données des emprunts
+    for (Emprunt emprunt : emprunts) {
+        historiqueTableModel.addRow(new Object[]{
+            emprunt.getID_Emprunt(),
+            emprunt.getDocument().getNom(), // ou getNom() selon votre classe
+            emprunt.getDateEmprunt(),
+            emprunt.getDateRetourPrevue(),
+            emprunt.getDateRetourReelle()// ou une méthode pour vérifier si retourné
+        });
+    }
+
+    // Créer une nouvelle table pour l'historique
+    JTable historiqueTable = new JTable(historiqueTableModel);
+    historiqueTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    JScrollPane scrollPane = new JScrollPane(historiqueTable);
+
+    // Créer un panneau pour l'historique
+    JPanel historiquePanel = new JPanel(new BorderLayout());
+    historiquePanel.add(new JLabel("Historique d'emprunt de l'adhérent ID: " + id),
+                        BorderLayout.NORTH);
+    historiquePanel.add(scrollPane, BorderLayout.CENTER);
+
+    // Afficher dans une nouvelle fenêtre ou un dialogue
+    JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this),
+                                  "Historique des emprunts", true);
+    dialog.setContentPane(historiquePanel);
+    dialog.setSize(600, 400);
+    dialog.setLocationRelativeTo(this);
+    dialog.setVisible(true);
+}
 
     private void supprimerAdherent() {
         int selectedRow = table.getSelectedRow();
