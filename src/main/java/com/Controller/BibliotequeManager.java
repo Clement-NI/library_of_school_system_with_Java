@@ -10,6 +10,8 @@ import com.Modele.DAO.DocumentDAO;
 import com.Modele.DAO.EmpruntDAO;
 import com.Modele.DAO.DatabaseConnection;
 import java.sql.SQLException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -37,11 +39,7 @@ public class BibliotequeManager {
 
     // ========== ADHERENT ==========
 
-    /**
-     * Inscrire un nouvel adhérent
-     * @param nom nom de l'adhérent
-     * @param prenom prénom de l'adhérent
-     */
+
     public void inscriptionAdherent(String nom, String prenom) {
         try {
             Adherent adherent = new Adherent(nom, prenom);
@@ -52,11 +50,7 @@ public class BibliotequeManager {
         }
     }
 
-    /**
-     * Rechercher un adhérent par ID
-     * @param id ID de l'adhérent
-     * @return objet Adherent ou null
-     */
+
     public Adherent rechercherAdherent(int id) {
         try {
             return adherentDAO.rechercherParId(id);
@@ -66,11 +60,7 @@ public class BibliotequeManager {
         }
     }
 
-    /**
-     * Rechercher des adhérents par nom
-     * @param nom nom à rechercher
-     * @return ArrayList des adhérents correspondants
-     */
+
     public ArrayList<Adherent> rechercherAdherentParNom(String nom) {
         try {
             return adherentDAO.rechercherParNom(nom);
@@ -80,10 +70,7 @@ public class BibliotequeManager {
         }
     }
 
-    /**
-     * Obtenir tous les adhérents
-     * @return ArrayList de tous les adhérents
-     */
+
     public ArrayList<Adherent> obtenirTousLesAdherents() {
         try {
             return adherentDAO.obtenirTous();
@@ -93,12 +80,10 @@ public class BibliotequeManager {
         }
     }
 
-    /**
-     * Modifier un adhérent
-     * @param adherent adhérent à modifier
-     */
-    public void modifierAdherent(Adherent adherent) {
+
+    public void modifierAdherent(int id, String nom, String prenom) {
         try {
+            Adherent adherent = new Adherent(id, nom, prenom);
             adherentDAO.modifier(adherent);
             System.out.println("✓ Adhérent modifié: " + adherent.toString());
         } catch (SQLException e) {
@@ -106,10 +91,7 @@ public class BibliotequeManager {
         }
     }
 
-    /**
-     * Supprimer un adhérent
-     * @param id ID de l'adhérent
-     */
+
     public void supprimerAdherent(int id) {
         try {
             adherentDAO.supprimer(id);
@@ -119,9 +101,7 @@ public class BibliotequeManager {
         }
     }
 
-    /**
-     * Afficher tous les adhérents
-     */
+
     public void afficherTousLesAdherents() {
         ArrayList<Adherent> adherents = obtenirTousLesAdherents();
         if (adherents.isEmpty()) {
@@ -140,10 +120,10 @@ public class BibliotequeManager {
     public void ajouterLivre(String nom, String description, String isbn, int nbpages) {
         try {
             Livre livre = new Livre(nom, description, isbn, nbpages);
-            documentDAO.ajouterLivre(livre);
-            System.out.println("✓ Livre ajouté: " + livre.toString());
+            documentDAO.ajouterDocument(livre);
+            System.out.println("Livre ajouté: " + livre.toString());
         } catch (SQLException e) {
-            System.err.println("✗ Erreur lors de l'ajout: " + e.getMessage());
+            System.err.println("Erreur lors de l'ajout: " + e.getMessage());
         }
     }
 
@@ -235,7 +215,7 @@ public class BibliotequeManager {
         try {
             Magazine magazine = new Magazine(nom, description, numero,
                 com.Modele.Periodite.valueOf(periodite));
-            documentDAO.ajouterMagazine(magazine);
+            documentDAO.ajouterDocument(magazine);
             System.out.println("✓ Magazine ajouté: " + magazine.toString());
         } catch (SQLException e) {
             System.err.println("✗ Erreur lors de l'ajout: " + e.getMessage());
@@ -360,14 +340,14 @@ public class BibliotequeManager {
             if (adherent != null && document != null) {
                 Emprunt emprunt = new Emprunt(document, adherent, new Date(), dateRetourPrevue);
                 empruntDAO.ajouter(emprunt);
-                System.out.println("✓ Emprunt créé: " + emprunt.toString());
+                System.out.println("Emprunt créé: " + emprunt.toString());
                 return emprunt;
             } else {
-                System.err.println("✗ Adhérent ou document non trouvé");
+                System.err.println("Adhérent ou document non trouvé");
                 return null;
             }
         } catch (SQLException e) {
-            System.err.println("✗ Erreur lors de la création d'emprunt: " + e.getMessage());
+            System.err.println("Erreur lors de la création d'emprunt: " + e.getMessage());
             return null;
         }
     }
@@ -395,7 +375,7 @@ public class BibliotequeManager {
         try {
             return empruntDAO.obtenirEmpruntsParAdherent(adherentId);
         } catch (SQLException e) {
-            System.err.println("✗ Erreur lors du chargement: " + e.getMessage());
+            System.err.println("Erreur lors du chargement: " + e.getMessage());
             return new ArrayList<>();
         }
     }
@@ -444,10 +424,7 @@ public class BibliotequeManager {
         }
     }
 
-    /**
-     * Compter le nombre total d'emprunts
-     * @return nombre d'emprunts
-     */
+
     public int compterEmprunts() {
         try {
             return empruntDAO.compterEmprunts();
@@ -478,22 +455,37 @@ public class BibliotequeManager {
         try {
             return empruntDAO.compterEmpruntsEnRetard();
         } catch (SQLException e) {
-            System.err.println("✗ Erreur lors du comptage: " + e.getMessage());
+            System.err.println("Erreur lors du comptage: " + e.getMessage());
             return 0;
         }
     }
 
-    // ========== STATISTIQUES ==========
-
-    /**
-     * Afficher les statistiques de la bibliothèque
-     */
-    public void afficherStatistiques() {
-        System.out.println("\n===== STATISTIQUES =====");
-        System.out.println("Livres: " + compterLivres());
-        System.out.println("Magazines: " + compterMagazines());
-        System.out.println("Emprunts total: " + compterEmprunts());
-        System.out.println("Emprunts non retournés: " + compterEmpruntsNonRetournes());
-        System.out.println("Emprunts en retard: " + compterEmpruntsEnRetard());
+    public void supprimerEmprunt(int empruntId) {
+        try {
+            empruntDAO.supprimer(empruntId);
+        }catch (SQLException e){
+            System.err.println("Erreur lors du supprimer de emprunt: " + e.getMessage());
+        }
     }
+
+    public void modifierEmprunt(int empruntId, String dateRetourPrevue) {
+    try {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Date dateRetourPrevueEnDate = dateFormat.parse(dateRetourPrevue);
+
+
+        Date aujourdhui = new Date();
+        if (dateRetourPrevueEnDate.after(aujourdhui)) {
+            empruntDAO.mettreAJourDateRetourPrevue(empruntId, dateRetourPrevueEnDate);
+            System.out.println("Date de retour prévue modifiée avec succès");
+        } else {
+            System.err.println("Erreur: La date de retour ne peut pas être dans le passé");
+        }
+
+    } catch (ParseException e) {
+        System.err.println("Erreur de format de date: " + e.getMessage());
+    } catch (SQLException e) {
+        System.err.println("Erreur lors de la modification de l'emprunt: " + e.getMessage());
+    }
+}
 }

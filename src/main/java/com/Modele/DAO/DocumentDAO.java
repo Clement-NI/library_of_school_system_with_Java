@@ -10,9 +10,106 @@ import java.util.ArrayList;
 
 public class DocumentDAO {
 
+    // ========= DOCUMENT =========
+    public void ajouterDocument(Document document) throws SQLException{
+        String sql_document = "INSERT INTO document(nom,description,type_de_document) VALUES(?,?,?)";
+
+       try(Connection conn = DatabaseConnection.getConnection();
+          PreparedStatement ps = conn.prepareStatement(sql_document)) {
+           ps.setString(1, document.getNom());
+           ps.setString(2, document.getDescription());
+           System.out.println("Ici" + document.getType_de_document());
+           ps.setString(3,document.getType_de_document());
+           ps.executeUpdate();
+             // Obtenir l'ID généré automatiquement
+            try (Statement stmt2 = conn.createStatement();
+             ResultSet rs = stmt2.executeQuery("SELECT last_insert_rowid() as id")) {
+            if (rs.next()) {
+                document.setId(rs.getInt("id"));
+            }
+
+            if(document.getType_de_document().equals("magazine")){
+                this.ajouterMagazine((Magazine) document);
+            }else if(document.getType_de_document().equals("livre")){
+                this.ajouterLivre((Livre) document);
+            }else{
+                System.out.println("Erreur du type de document");
+            }
+
+       }
+      }catch (SQLException e) {
+           e.printStackTrace();
+       }
+    }
+
+    public ArrayList<Livre> obtenirTousLesDocument() throws SQLException {
+        ArrayList<Livre> livres = new ArrayList<>();
+        String sql = "SELECT * FROM document";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            while (rs.next()) {
+                livres.add(crierLivre(rs));
+            }
+        }
+        return livres;
+    }
+
+
+    public Document rechercherDocumentsParId(int id) throws SQLException {
+        String sql = "SELECT * FROM document WHERE id = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, id);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                return crierLivre(rs);
+            }
+        }
+        return null;
+    }
+
+    public Document modifiyDocument(Document document) throws SQLException{
+        return null;
+    }
+
+    public ArrayList<Document> rechercherTousLesDocumentsParNom(String nom) throws SQLException {
+        ArrayList<Document> documents = new ArrayList<>();
+        String sql = "SELECT * FROM document WHERE nom LIKE ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, "%" + nom + "%");
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                documents.add(crierLivre(rs));
+            }
+        }
+
+        return documents;
+    }
+
+    public void supprimerDocument(int documentId) throws SQLException{
+        String sql = "DELETE FROM document WHERE id = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1,documentId);
+            ResultSet rs = stmt.executeQuery();
+
+        }
+    }
+
+
     // ========== LIVRE ==========
     public void ajouterLivre(Livre livre) throws SQLException {
-        String sql = "INSERT INTO Livres (nom, description, ISBN, nombre_de_pages) VALUES (?, ?, ?, ?)";
+
+        String sql = "INSERT INTO Livres (nom, description, ISBN, nombre_de_pages,id) VALUES (?, ?, ?, ?,?)";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -20,16 +117,13 @@ public class DocumentDAO {
             stmt.setString(2, livre.getDescription());
             stmt.setString(3, livre.getISBN());
             stmt.setInt(4, livre.getNbpages());
+            stmt.setInt(5, livre.getId());
             stmt.executeUpdate();
 
-            // Obtenir l'ID généré automatiquement
-           try (Statement stmt2 = conn.createStatement();
-             ResultSet rs = stmt2.executeQuery("SELECT last_insert_rowid() as id")) {
-            if (rs.next()) {
-                livre.setId(rs.getInt("id"));
-            }
+
         }
-        }
+
+
     }
 
 
@@ -154,7 +248,7 @@ public class DocumentDAO {
 
 
     public void ajouterMagazine(Magazine magazine) throws SQLException {
-        String sql = "INSERT INTO Magazine (nom, description, numero, periodite) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO Magazine (nom, description, numero, periodite,id) VALUES (?, ?, ?, ?,?)";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -162,15 +256,8 @@ public class DocumentDAO {
             stmt.setString(2, magazine.getDescription());
             stmt.setInt(3, magazine.getNumero());
             stmt.setString(4, magazine.getPeriodite().toString());
+            stmt.setInt(5, magazine.getId());
             stmt.executeUpdate();
-
-            // Obtenir l'ID généré automatiquement
-            try (Statement stmt2 = conn.createStatement();
-             ResultSet rs = stmt2.executeQuery("SELECT last_insert_rowid() as id")) {
-            if (rs.next()) {
-                magazine.setId(rs.getInt("id"));
-            }
-        }
         }
     }
 
@@ -306,27 +393,7 @@ public class DocumentDAO {
         return magazine;
     }
 
-    public ArrayList<Document> rechercherTousLesDocumentsParNom(String nom) throws SQLException {
-        ArrayList<Document> documents = new ArrayList<>();
 
-        // Ajouter les livres
-        documents.addAll(rechercherLivreParNom(nom));
-
-        // Ajouter les magazines
-        documents.addAll(rechercherMagazineParNom(nom));
-
-        return documents;
-    }
-
-
-    public ArrayList<Document> obtenirTousLesDocuments() throws SQLException {
-        ArrayList<Document> documents = new ArrayList<>();
-
-        documents.addAll(obtenirTousLesLivres());
-        documents.addAll(obtenirTousLesMagazines());
-
-        return documents;
-    }
 
 
     public int compterDocuments() throws SQLException {

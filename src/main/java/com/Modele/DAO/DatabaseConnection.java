@@ -62,7 +62,7 @@ public class DatabaseConnection {
             // Créer la table des livres
             conn.createStatement().execute(
                 "CREATE TABLE IF NOT EXISTS Livres (" +
-                "  id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                "  id INTEGER PRIMARY KEY," +
                 "  nom TEXT NOT NULL," +
                 "  description TEXT," +
                 "  ISBN TEXT NOT NULL," +
@@ -75,7 +75,7 @@ public class DatabaseConnection {
             // Créer la table des magazines
             conn.createStatement().execute(
                 "CREATE TABLE IF NOT EXISTS Magazine (" +
-                "  id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                "  id INTEGER PRIMARY KEY," +
                         "  nom TEXT NOT NULL," +
                 "  description TEXT," +
                 "  numero INTEGER," +

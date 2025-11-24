@@ -108,7 +108,7 @@ public class EmpruntDAO {
     public ArrayList<Emprunt> obtenirEmpruntsEnRetard() throws SQLException {
         ArrayList<Emprunt> emprunts = new ArrayList<>();
         String sql = "SELECT * FROM emprunt " +
-                     "WHERE dateRetourReelle IS NULL AND dateRetourPrevue < CURRENT_DATE " +
+                     "WHERE dateRetourPrevue > CURRENT_DATE " +
                      "ORDER BY dateRetourPrevue";
 
         try (Connection conn = DatabaseConnection.getConnection();
@@ -126,7 +126,7 @@ public class EmpruntDAO {
     public ArrayList<Emprunt> obtenirEmpruntsEnRetardParAdherent(int adherentId) throws SQLException {
         ArrayList<Emprunt> emprunts = new ArrayList<>();
         String sql = "SELECT * FROM emprunt " +
-                     "WHERE adherent_id = ? AND dateRetourReelle IS NULL AND dateRetourPrevue < CURRENT_DATE " +
+                     "WHERE adherent_id = ? AND dateRetourPrevue > CURRENT_DATE " +
                      "ORDER BY dateRetourPrevue";
 
         try (Connection conn = DatabaseConnection.getConnection();
@@ -163,6 +163,17 @@ public class EmpruntDAO {
             }
         }
         return emprunts;
+    }
+
+     public void mettreAJourDateRetourPrevue(int empruntId, Date dateRetourPrevue) throws SQLException {
+        String sql = "UPDATE emprunt SET dateRetourPrevue = ? WHERE id = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setDate(1, new java.sql.Date(dateRetourPrevue.getTime()));
+            stmt.setInt(2, empruntId);
+            stmt.executeUpdate();
+        }
     }
 
 
@@ -275,7 +286,7 @@ public class EmpruntDAO {
      */
     public int compterEmpruntsEnRetard() throws SQLException {
         String sql = "SELECT COUNT(*) as count FROM emprunt " +
-                     "WHERE dateRetourReelle IS NULL AND dateRetourPrevue < CURRENT_DATE";
+                     "WHERE dateRetourPrevue > CURRENT_DATE";
 
         try (Connection conn = DatabaseConnection.getConnection();
              Statement stmt = conn.createStatement();

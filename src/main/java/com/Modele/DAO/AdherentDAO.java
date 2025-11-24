@@ -91,13 +91,14 @@ public class AdherentDAO {
 
 
     public void supprimer(int id) throws SQLException {
-        String sql = "DELETE FROM adherent WHERE id = ? AND statutPenalite = 0";
+        String sql = "DELETE FROM adherent WHERE id = ?";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, id);
             stmt.executeUpdate();
         }
     }
+
 
     private Adherent creerAdherent(ResultSet rs) throws SQLException {
         Adherent adherent = new Adherent(-1,rs.getString("nom"), rs.getString("prenom"));

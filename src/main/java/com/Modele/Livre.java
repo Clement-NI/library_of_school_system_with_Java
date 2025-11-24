@@ -6,13 +6,13 @@ public class Livre extends Document{
     private int nbpages;
 
     public Livre(int ID, String nom, String description, String ISBN, int nbpages) {
-        super(ID,nom, description);
+        super(ID,nom, description,"livre");
         this.ISBN = ISBN;
         this.nbpages = nbpages;
     }
 
     public Livre(String nom, String descprtion, String ISBN, int nbpages) {
-        super(nom,descprtion);
+        super(nom,descprtion,"livre");
         this.ISBN = ISBN;
         this.nbpages = nbpages;
     }
@@ -32,5 +32,7 @@ public class Livre extends Document{
     public void setNbpages(int nbpages) {
         this.nbpages = nbpages;
     }
+
+
 
 }

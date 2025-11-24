@@ -99,8 +99,13 @@ public class AdherentPanel extends JPanel {
         return panel;
     }
 
+
     private JPanel createBottomPanel() {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
+
+        JButton modifyButton = new JButton("Modifier");
+        modifyButton.addActionListener(e-> modifyAdherent());
+        panel.add(modifyButton);
 
         JButton deleteButton = new JButton("Supprimer");
         deleteButton.addActionListener(e -> supprimerAdherent());
@@ -133,6 +138,56 @@ public class AdherentPanel extends JPanel {
         refreshTable();
         JOptionPane.showMessageDialog(this, "Adhérent ajouté avec succès",
             "Succès", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    private void modifyAdherent() {
+        int selectedRow = table.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Veuillez sélectionner un adhérent",
+                "Erreur", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        int id = (int) tableModel.getValueAt(selectedRow, 0);
+        String nomActuel = (String) tableModel.getValueAt(selectedRow, 1);
+        String prenomActuel = (String) tableModel.getValueAt(selectedRow, 2);
+
+        JTextField nomField = new JTextField(nomActuel);
+        JTextField prenomField = new JTextField(prenomActuel);
+
+        JPanel panel = new JPanel(new GridLayout(2, 2, 10, 10));
+        panel.add(new JLabel("Nom:"));
+        panel.add(nomField);
+        panel.add(new JLabel("Prénom:"));
+        panel.add(prenomField);
+        //panel.add(new JLabel("Penalite");
+
+
+
+        int result = JOptionPane.showConfirmDialog(this, panel,
+            "Modifier l'adhérent", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+
+        if (result == JOptionPane.OK_OPTION) {
+            String nouveauNom = nomField.getText().trim();
+            String nouveauPrenom = prenomField.getText().trim();
+
+
+            if (nouveauNom.isEmpty() || nouveauPrenom.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Le nom et le prénom ne peuvent pas être vides",
+                    "Erreur", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            manager.modifierAdherent(id, nouveauNom, nouveauPrenom);
+            refreshTable();
+            JOptionPane.showMessageDialog(this, "Adhérent modifié avec succès",
+                    "Succès", JOptionPane.INFORMATION_MESSAGE);
+
+        }
+    }
+
+    private void showHistorique(){
+        //Ici on essaie d'indiquer historique
     }
 
     private void supprimerAdherent() {

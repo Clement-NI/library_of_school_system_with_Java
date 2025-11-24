@@ -8,13 +8,13 @@ public class Magazine extends Document{
     private Periodite periodite;
 
     public Magazine(int id,String nom,String description, int numero, Periodite periodite) {
-        super(id,nom, description);
+        super(id,nom, description,"magazine");
         this.numero = numero;
         this.periodite = periodite;
     }
 
     public Magazine(String nom, String description, int numero, Periodite periodite) {
-        super(nom, description);
+        super(nom, description,"magazine");
         this.numero = numero;
         this.periodite = periodite;
     }
