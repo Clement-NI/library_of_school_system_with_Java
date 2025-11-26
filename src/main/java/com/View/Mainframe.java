@@ -22,8 +22,9 @@ public class Mainframe extends JFrame {
         tabbedPane = new JTabbedPane();
 
         tabbedPane.addTab("Adhérents", new AdherentPanel(manager));
-        tabbedPane.addTab("Livres", new LivrePanel(manager));
-        tabbedPane.addTab("Magazines", new MagazinePanel(manager));
+        tabbedPane.addTab("Documents",new DocumentPanel(manager));
+//        tabbedPane.addTab("Livres", new LivrePanel(manager));
+//        tabbedPane.addTab("Magazines", new MagazinePanel(manager));
         tabbedPane.addTab("Emprunts", new EmpruntPanel(manager));
 
         add(tabbedPane);

@@ -108,7 +108,7 @@ public class EmpruntDAO {
     public ArrayList<Emprunt> obtenirEmpruntsEnRetard() throws SQLException {
         ArrayList<Emprunt> emprunts = new ArrayList<>();
         String sql = "SELECT * FROM emprunt " +
-                     "WHERE dateRetourPrevue > CURRENT_DATE " +
+                     "WHERE (dateRetourPrevue > CURRENT_DATE AND dateRetourReelle IS NULL)" +
                      "ORDER BY dateRetourPrevue";
 
         try (Connection conn = DatabaseConnection.getConnection();
@@ -126,7 +126,7 @@ public class EmpruntDAO {
     public ArrayList<Emprunt> obtenirEmpruntsEnRetardParAdherent(int adherentId) throws SQLException {
         ArrayList<Emprunt> emprunts = new ArrayList<>();
         String sql = "SELECT * FROM emprunt " +
-                     "WHERE adherent_id = ? AND dateRetourPrevue > CURRENT_DATE " +
+                     "WHERE adherent_id = ? AND (dateRetourPrevue < CURRENT_DATE AND dateRetourReelle IS NULL) OR(dateRetourReelle IS NOT NULL AND dateRetourPrevue < dateRetourReelle ) " +
                      "ORDER BY dateRetourPrevue";
 
         try (Connection conn = DatabaseConnection.getConnection();
@@ -211,14 +211,14 @@ public class EmpruntDAO {
                         stmt.executeUpdate();
                     }
 
-                    // Vérifier si en retard et mettre à jour le statut de l'adhérent
-                    if (dateActuelle.after(emprunt.getDateRetourPrevue())) {
-                        try (PreparedStatement stmt = conn.prepareStatement(
-                                "UPDATE adherent SET statutPenalite = 1 WHERE id = ?")) {
-                            stmt.setInt(1, emprunt.getAdherent().getID());
-                            stmt.executeUpdate();
-                        }
-                    }
+//                    // Vérifier si en retard et mettre à jour le statut de l'adhérent
+//                    if (dateActuelle.after(emprunt.getDateRetourPrevue())) {
+//                        try (PreparedStatement stmt = conn.prepareStatement(
+//                                "UPDATE adherent SET statutPenalite = 0 WHERE id = ?")) {
+//                            stmt.setInt(1, emprunt.getAdherent().getID());
+//                            stmt.executeUpdate();
+//                        }
+//                    }
                 }
                 conn.commit();
             } catch (SQLException e) {
@@ -286,7 +286,7 @@ public class EmpruntDAO {
      */
     public int compterEmpruntsEnRetard() throws SQLException {
         String sql = "SELECT COUNT(*) as count FROM emprunt " +
-                     "WHERE dateRetourPrevue > CURRENT_DATE";
+                     "WHERE dateRetourPrevue < CURRENT_DATE AND dateRetourReelle IS NULL ";
 
         try (Connection conn = DatabaseConnection.getConnection();
              Statement stmt = conn.createStatement();

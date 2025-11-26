@@ -4,19 +4,19 @@ public class Adherent {
     private int ID_Adherent;
     private String Nom;
     private String Prenom;
-    private boolean Statut_Penalite;
+    private double Statut_Penalite;
 
     public Adherent(int ID, String Nom, String Prenom) {
         this.ID_Adherent = ID;
         this.Nom = Nom;
         this.Prenom = Prenom;
-        Statut_Penalite = false;
+        Statut_Penalite = 0;
     }
 
     public Adherent(String Nom, String Prenom) {
         this.Nom = Nom;
         this.Prenom = Prenom;
-        Statut_Penalite = false;
+        Statut_Penalite = 0;
     }
 
     public int getID() {
@@ -31,12 +31,12 @@ public class Adherent {
         return Prenom;
     }
 
-    public boolean getStatutPenalite() {
-        return Statut_Penalite;
+    public double getStatutPenalite() {
+        return this.Statut_Penalite;
     }
 
-    public void setStatut_Adherent(boolean Statut_Penalite) {
-        this.Statut_Penalite = Statut_Penalite;
+    public void setStatut_Adherent(double penalite) {
+        this.Statut_Penalite = penalite;
     }
 
     public void setNom_Adherent(String Nom) {

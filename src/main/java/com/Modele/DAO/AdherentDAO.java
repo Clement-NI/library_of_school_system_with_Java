@@ -25,7 +25,7 @@ public class AdherentDAO {
          PreparedStatement stmt = conn.prepareStatement(sql)) {
         stmt.setString(1, adherent.getNom());
         stmt.setString(2, adherent.getPrenom());
-        stmt.setBoolean(3, adherent.getStatutPenalite());
+        stmt.setDouble(3, adherent.getStatutPenalite());
         stmt.executeUpdate();
 
         try (Statement stmt2 = conn.createStatement();
@@ -83,7 +83,7 @@ public class AdherentDAO {
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, adherent.getNom());
             stmt.setString(2, adherent.getPrenom());
-            stmt.setBoolean(3, adherent.getStatutPenalite());
+            stmt.setDouble(3, adherent.getStatutPenalite());
             stmt.setInt(4, adherent.getID());
             stmt.executeUpdate();
         }
@@ -103,7 +103,7 @@ public class AdherentDAO {
     private Adherent creerAdherent(ResultSet rs) throws SQLException {
         Adherent adherent = new Adherent(-1,rs.getString("nom"), rs.getString("prenom"));
         adherent.setID(rs.getInt("id"));
-        adherent.setStatut_Adherent(rs.getBoolean("statutPenalite"));
+        adherent.setStatut_Adherent(rs.getDouble("statutPenalite"));
         return adherent;
     }
 
@@ -118,6 +118,15 @@ public class AdherentDAO {
         }
 
         return 0;
+    }
+
+    public void effacerPenalite(int id) throws  SQLException{
+        String sql = "UPDATE adherent SET statutPenalite = 0 WHERE id = ?";
+                try (Connection conn = DatabaseConnection.getConnection();
+        PreparedStatement stmt = conn.prepareStatement(sql)) {
+                    stmt.setInt(1,id);
+                    stmt.executeUpdate();
+                }
     }
 
 }

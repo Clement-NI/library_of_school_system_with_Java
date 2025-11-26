@@ -2,6 +2,8 @@ package com.Modele;
 
 import java.util.Date;
 
+import static java.lang.Math.max;
+
 public class Emprunt {
     private int ID_Emprunt;
     private Document Document;
@@ -49,9 +51,8 @@ public class Emprunt {
         this.ID_Emprunt = ID_Emprunt;
     }
 
-    public void modifyStatusAdherent(){
-            this.adherent.setStatut_Adherent(true);
-
+    public void modifyStatusAdherent(int jour_de_retard){
+            this.adherent.setStatut_Adherent(max(0.5 * jour_de_retard,adherent.getStatutPenalite()));
     }
 
     @Override

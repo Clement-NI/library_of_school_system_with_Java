@@ -43,7 +43,7 @@ public class DatabaseConnection {
                 "  id INTEGER PRIMARY KEY AUTOINCREMENT," +
                 "  nom TEXT NOT NULL," +
                 "  prenom TEXT NOT NULL," +
-                "  statutPenalite INTEGER DEFAULT 0" +
+                "  statutPenalite FLOAT DEFAULT 0" +
                 ")"
             );
             System.out.println(" Table 'adherent' créée");
@@ -66,7 +66,8 @@ public class DatabaseConnection {
                 "  nom TEXT NOT NULL," +
                 "  description TEXT," +
                 "  ISBN TEXT NOT NULL," +
-                        "nombre_de_pages INTEGER NOT NULL" +
+                        "nombre_de_pages INTEGER NOT NULL," +
+                        "FOREIGN KEY(id) REFERENCES document(id) ON DELETE CASCADE" +
                 ")"
             );
             System.out.println(" Table 'livres' créée");
@@ -79,7 +80,8 @@ public class DatabaseConnection {
                         "  nom TEXT NOT NULL," +
                 "  description TEXT," +
                 "  numero INTEGER," +
-                "  periodite TEXT" +
+                "  periodite TEXT," +
+                        "FOREIGN KEY(id) REFERENCES document(id) ON DELETE CASCADE" +
                 ")"
             );
             System.out.println("Table 'magazine' créée");
@@ -94,10 +96,30 @@ public class DatabaseConnection {
                 "  dateEmprunt DATE NOT NULL," +
                 "  dateRetourPrevue DATE NOT NULL," +
                 "  dateRetourReelle DATE," +
-                "  FOREIGN KEY(adherent_id) REFERENCES adherent(id)" +
+                "  FOREIGN KEY(adherent_id) REFERENCES Adherent(id) ON DELETE CASCADE," +
+                        "  FOREIGN KEY(document_id) REFERENCES document(id) ON DELETE CASCADE" +
                 ")"
             );
             System.out.println(" Table 'emprunt' créée");
+
+
+            conn.createStatement().execute(
+                    "CREATE VIEW IF NOT EXISTS document_view AS " +
+                    "SELECT " +
+                    "    d.id, " +
+                    "    d.nom, " +
+                    "    d.description, " +
+                    "    d.type_de_document, " +
+                    "    l.ISBN, " +
+                    "    l.nombre_de_pages, " +
+                    "    m.numero, " +
+                    "    m.periodite " +
+                    "FROM document d " +
+                    "LEFT JOIN livres l ON d.id = l.id " +
+                    "LEFT JOIN magazine m ON d.id = m.id"
+);
+            System.out.println("Vue 'document_view' créée avec succès");
+
 
             System.out.println("\n Initialisation de la base de données réussie! Fichier: bibliotheque.db");
 

@@ -176,7 +176,7 @@ public class EmpruntPanel extends JPanel {
         if (emprunt != null) {
             adherentIdField.setText("");
             documentIdField.setText("");
-            dateRetourPrevueField.setText("");
+            dateRetourPrevueField.setText(dateRetourStr);
             refreshTable();
             JOptionPane.showMessageDialog(this, "Emprunt créé avec succès",
                 "Succès", JOptionPane.INFORMATION_MESSAGE);
@@ -235,15 +235,17 @@ public class EmpruntPanel extends JPanel {
             String dateRetourReelle = e.getDateRetourReelle() != null ?
                 dateFormat.format(e.getDateRetourReelle()) : "N/A";
 
-            tableModel.addRow(new Object[]{
-                e.getID_Emprunt(),
-                e.getAdherent().getID(),
-                e.getAdherent().getNom() + " " + e.getAdherent().getPrenom(),
-                e.getDocument().getNom(),
-                dateFormat.format(e.getDateEmprunt()),
-                dateFormat.format(e.getDateRetourPrevue()),
-                dateRetourReelle
-            });
+            if(e.getAdherent()!= null && e.getDocument()!=null){
+                tableModel.addRow(new Object[]{
+                    e.getID_Emprunt(),
+                    e.getAdherent().getID(),
+                    e.getAdherent().getNom() + " " + e.getAdherent().getPrenom(),
+                    e.getDocument().getNom(),
+                    dateFormat.format(e.getDateEmprunt()),
+                    dateFormat.format(e.getDateRetourPrevue()),
+                    dateRetourReelle
+                });
+            }
         }
     }
 

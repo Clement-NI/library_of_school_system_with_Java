@@ -1,10 +1,6 @@
 package com.Controller;
 
-import com.Modele.Adherent;
-import com.Modele.Document;
-import com.Modele.Livre;
-import com.Modele.Magazine;
-import com.Modele.Emprunt;
+import com.Modele.*;
 import com.Modele.DAO.AdherentDAO;
 import com.Modele.DAO.DocumentDAO;
 import com.Modele.DAO.EmpruntDAO;
@@ -122,6 +118,84 @@ public class BibliotequeManager {
         }
         return 0;
 
+    }
+
+    public void effacerPenalite(int id){
+        try {
+             adherentDAO.effacerPenalite(id);
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    // =============== Document =====================
+    public void ajouterDocument(String nom, String description, String isbn, int nbpages,String type_de_document){
+        if(type_de_document.equals("livre")){
+            ajouterLivre(nom, description, isbn, nbpages);
+        }
+    }
+
+    public void ajouterDocument(String nom, String description, int number, String periodite,String type_de_document){
+        if(type_de_document.equals("magazine")){
+            ajouterMagazine(nom, description, number, periodite);
+        }
+    }
+
+    public void supprimerDocument(int id){
+        try {
+              documentDAO.supprimerDocument(id);
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void modifierDocument(int id, String nom, String description, String isbn, int nbpages, String type_de_document){
+        if(type_de_document.equals("livre")){
+            try {
+                 documentDAO.modifierLivre(new Livre(id,nom,description,isbn,nbpages));
+            }catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void modifierDocument(int id, String nom, String description, int numero, String periodite, String type_de_document){
+        if(type_de_document.equals("magazine")){
+            try {
+                 documentDAO.modifierMagazine(new Magazine(id,nom,description,numero,Periodite.valueOf(periodite)));
+            }catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public Document recherchertouslesDocumentsParId(int id){
+        try {
+            return documentDAO.rechercherDocumentsParId(id);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
+
+    }
+
+    public ArrayList<Document> recherchertouslesDocumentsParNom(String nom){
+        try {
+            return documentDAO.rechercherTousLesDocumentsParNom(nom);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return new ArrayList<Document>();
+    }
+
+    public ArrayList<Document> obtenirtouslesDocuments(){
+        try {
+            return documentDAO.obtenirTousLesDocument();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return new ArrayList<Document>();
     }
 
 
@@ -374,6 +448,7 @@ public class BibliotequeManager {
 
     public ArrayList<Emprunt> obtenirTousLesEmprunts() {
         try {
+            this.obtenirEmpruntsEnRetard();
             return empruntDAO.obtenirTous();
         } catch (SQLException e) {
             System.err.println("Erreur lors du chargement: " + e.getMessage());
@@ -383,6 +458,7 @@ public class BibliotequeManager {
 
     public ArrayList<Emprunt> obtenirEmpruntsAdherent(int adherentId) {
         try {
+            this.obtenirEmpruntsEnRetard();
             return empruntDAO.obtenirEmpruntsParAdherent(adherentId);
         } catch (SQLException e) {
             System.err.println("Erreur lors du chargement: " + e.getMessage());
@@ -392,6 +468,7 @@ public class BibliotequeManager {
 
     public ArrayList<Emprunt> obtenirEmpruntsNonRetournes() {
         try {
+            this.obtenirEmpruntsEnRetard();
             return empruntDAO.obtenirEmpruntsNonRetournes();
         } catch (SQLException e) {
             System.err.println("✗ Erreur lors du chargement: " + e.getMessage());
@@ -399,18 +476,28 @@ public class BibliotequeManager {
         }
     }
 
+    private int calculerJoursEnRetard(Emprunt emprunt, Date aujourdhui) {
+            long dateRetourPrevueMs = emprunt.getDateRetourPrevue().getTime();
+            long aujourdhuiMs = aujourdhui.getTime();
+            long differenceMs = aujourdhuiMs - dateRetourPrevueMs;
+            return (int) (differenceMs / (24 * 60 * 60 * 1000));
+    }
+
     public ArrayList<Emprunt> obtenirEmpruntsEnRetard() {
+        int jour_de_retard;
         try {
             ArrayList<Emprunt> emprunts = empruntDAO.obtenirEmpruntsEnRetard();
             for(Emprunt emprunt : emprunts){
-                emprunt.modifyStatusAdherent();
+                jour_de_retard = calculerJoursEnRetard(emprunt,new Date());
+                emprunt.modifyStatusAdherent(jour_de_retard);
                 adherentDAO.modifier(emprunt.getAdherent());
-            }
             return emprunts;
+         }
         } catch (SQLException e) {
             System.err.println("✗ Erreur lors du chargement: " + e.getMessage());
             return new ArrayList<>();
         }
+        return new ArrayList<>();
     }
 
     public ArrayList<Emprunt> obtenirEmpruntsEnRetardAdherent(int adherentId) {
@@ -491,6 +578,8 @@ public class BibliotequeManager {
         } else {
             System.err.println("Erreur: La date de retour ne peut pas être dans le passé");
         }
+
+//                  empruntDAO.mettreAJourDateRetourPrevue(empruntId, dateRetourPrevueEnDate);
 
     } catch (ParseException e) {
         System.err.println("Erreur de format de date: " + e.getMessage());

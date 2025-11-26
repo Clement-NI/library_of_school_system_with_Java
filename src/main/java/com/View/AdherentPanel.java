@@ -116,6 +116,10 @@ public class AdherentPanel extends JPanel {
         histoButton.addActionListener(e->showHistorique());
         panel.add(histoButton);
 
+        JButton effacerButton = new JButton("Effacer Penalite");
+        effacerButton.addActionListener(e->effacerPenalte());
+        panel.add(effacerButton);
+
         JButton refreshButton = new JButton("Rafraîchir");
         refreshButton.addActionListener(e -> refreshTable());
         panel.add(refreshButton);
@@ -123,6 +127,8 @@ public class AdherentPanel extends JPanel {
         JButton statsButton = new JButton("Statistiques");
         statsButton.addActionListener(e -> afficherStats());
         panel.add(statsButton);
+
+
 
         return panel;
     }
@@ -218,6 +224,9 @@ public class AdherentPanel extends JPanel {
 
     // Remplir le modèle avec les données des emprunts
     for (Emprunt emprunt : emprunts) {
+        if(emprunt.getDocument() == null){
+            continue;
+        }
         historiqueTableModel.addRow(new Object[]{
             emprunt.getID_Emprunt(),
             emprunt.getDocument().getNom(), // ou getNom() selon votre classe
@@ -292,7 +301,7 @@ public class AdherentPanel extends JPanel {
                 a.getID(),
                 a.getNom(),
                 a.getPrenom(),
-                a.getStatutPenalite() ? "Oui" : "Non"
+                a.getStatutPenalite()
             });
         }
     }
@@ -302,6 +311,27 @@ public class AdherentPanel extends JPanel {
         String message = "Nombre total d'adhérents: " + total;
         JOptionPane.showMessageDialog(this, message,
             "Statistiques", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    private void effacerPenalte(){
+         int selectedRow = table.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Veuillez sélectionner un adhérent",
+                "Erreur", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        int id = (int) tableModel.getValueAt(selectedRow, 0);
+        int confirm = JOptionPane.showConfirmDialog(this,
+            "Êtes-vous sûr de vouloir effacer la penalite de cet adhérent?",
+            "Confirmation", JOptionPane.YES_NO_OPTION);
+
+        if (confirm == JOptionPane.YES_OPTION) {
+            manager.effacerPenalite(id);
+            refreshTable();
+            JOptionPane.showMessageDialog(this, "La penalite de cet adhérent efface avec succès",
+                "Succès", JOptionPane.INFORMATION_MESSAGE);
+        }
     }
 }
 

@@ -171,7 +171,7 @@ public class LivrePanel extends JPanel {
             "Confirmation", JOptionPane.YES_NO_OPTION);
 
         if (confirm == JOptionPane.YES_OPTION) {
-            manager.supprimerLivre(id);
+            manager.supprimerDocument(id);
             refreshTable();
             JOptionPane.showMessageDialog(this, "Livre supprimé avec succès",
                 "Succès", JOptionPane.INFORMATION_MESSAGE);

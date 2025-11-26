@@ -171,7 +171,7 @@ public class MagazinePanel extends JPanel {
             "Confirmation", JOptionPane.YES_NO_OPTION);
 
         if (confirm == JOptionPane.YES_OPTION) {
-            manager.supprimerMagazine(id);
+            manager.supprimerDocument(id);
             refreshTable();
             JOptionPane.showMessageDialog(this, "Magazine supprimé avec succès",
                 "Succès", JOptionPane.INFORMATION_MESSAGE);

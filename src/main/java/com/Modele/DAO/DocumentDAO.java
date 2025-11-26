@@ -42,24 +42,24 @@ public class DocumentDAO {
        }
     }
 
-    public ArrayList<Livre> obtenirTousLesDocument() throws SQLException {
-        ArrayList<Livre> livres = new ArrayList<>();
-        String sql = "SELECT * FROM document";
+    public ArrayList<Document> obtenirTousLesDocument() throws SQLException {
+        ArrayList<Document> documents = new ArrayList<>();
+        String sql = "SELECT * FROM document_view";
 
         try (Connection conn = DatabaseConnection.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
 
             while (rs.next()) {
-                livres.add(crierLivre(rs));
+                documents.add(crierDocument(rs));
             }
         }
-        return livres;
+        return documents;
     }
 
 
     public Document rechercherDocumentsParId(int id) throws SQLException {
-        String sql = "SELECT * FROM document WHERE id = ?";
+        String sql = "SELECT * FROM document_view WHERE id = ?";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -67,7 +67,7 @@ public class DocumentDAO {
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
-                return crierLivre(rs);
+                return crierDocument(rs);
             }
         }
         return null;
@@ -79,7 +79,7 @@ public class DocumentDAO {
 
     public ArrayList<Document> rechercherTousLesDocumentsParNom(String nom) throws SQLException {
         ArrayList<Document> documents = new ArrayList<>();
-        String sql = "SELECT * FROM document WHERE nom LIKE ?";
+        String sql = "SELECT * FROM document_view WHERE nom LIKE ?";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -87,22 +87,72 @@ public class DocumentDAO {
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
-                documents.add(crierLivre(rs));
+                documents.add(crierDocument(rs));
             }
         }
 
         return documents;
     }
 
+     private Document crierDocument(ResultSet rs) throws SQLException {
+        if(rs.getString("type_de_document").equals("magazine")){
+             Document document = new Magazine(
+                rs.getInt("id"),
+                rs.getString("nom"),
+                rs.getString("description"),
+                rs.getInt("numero"),
+                Periodite.valueOf(rs.getString("periodite"))
+          );
+             return document;
+
+        }else if(rs.getString("type_de_document").equals("livre")) {
+            Document document = new Livre(
+                rs.getInt("id"),
+                rs.getString("nom"),
+                rs.getString("description"),
+                rs.getString("ISBN"),
+                rs.getInt("nombre_de_pages")
+          );
+            return document;
+
+
+        }else{
+           return null;
+        }
+
+    }
+
     public void supprimerDocument(int documentId) throws SQLException{
-        String sql = "DELETE FROM document WHERE id = ?";
+        String sql1 = "DELETE FROM document WHERE id = ?";
 
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+             PreparedStatement stmt = conn.prepareStatement(sql1)) {
             stmt.setInt(1,documentId);
-            ResultSet rs = stmt.executeQuery();
+            stmt.executeUpdate();
 
         }
+
+        String sql2 = "DELETE FROM livres WHERE id = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql2)) {
+            stmt.setInt(1,documentId);
+            stmt.executeUpdate();
+
+        }
+
+        String sql3 = "DELETE FROM magazine WHERE id = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql3)) {
+            stmt.setInt(1,documentId);
+            stmt.executeUpdate();
+
+        }
+
+
+
+
     }
 
 
