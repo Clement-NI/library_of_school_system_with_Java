@@ -106,20 +106,23 @@ public class EmpruntDAO {
 
 
     public ArrayList<Emprunt> obtenirEmpruntsEnRetard() throws SQLException {
-        ArrayList<Emprunt> emprunts = new ArrayList<>();
-        String sql = "SELECT * FROM emprunt " +
-                     "WHERE (dateRetourPrevue > CURRENT_DATE AND dateRetourReelle IS NULL)" +
-                     "ORDER BY dateRetourPrevue";
+            ArrayList<Emprunt> emprunts = new ArrayList<>();
+            String sql = "SELECT * FROM emprunt " +
+                         "WHERE dateRetourPrevue < ? AND dateRetourReelle IS NULL " +
+                         "ORDER BY dateRetourPrevue";
 
-        try (Connection conn = DatabaseConnection.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+            try (Connection conn = DatabaseConnection.getConnection();
+                 PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            while (rs.next()) {
-                emprunts.add(crierEmprunt(rs));
+                stmt.setLong(1, System.currentTimeMillis());
+
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        emprunts.add(crierEmprunt(rs));
+                    }
+                }
             }
-        }
-        return emprunts;
+            return emprunts;
     }
 
 
@@ -331,6 +334,36 @@ public class EmpruntDAO {
         }
         return documents;
     }
+
+    public double getPenaliteParEmprunt(int id) throws SQLException {
+    double penalite = 0.0;
+    String sql = "SELECT " +
+            "ROUND(" +
+            "    COALESCE( " +
+            "        0.5 * ( " +
+            "            julianday('now') - " +
+            "            julianday(datetime(E.dateRetourPrevue / 1000, 'unixepoch')) " +
+            "        ), " +
+            "        0 " +
+            "    ),2) AS penalite " +
+            "FROM Emprunt E " +
+            "WHERE E.id = ? " +
+            "    AND datetime(E.dateRetourPrevue / 1000, 'unixepoch') < datetime('now') " +
+            "    AND E.dateRetourReelle IS NULL";
+
+    try (Connection conn = DatabaseConnection.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        pstmt.setInt(1, id);
+
+        try (ResultSet rs = pstmt.executeQuery()) {
+            if (rs.next()) {
+                penalite = rs.getDouble("penalite");
+            }
+        }
+    }
+
+    return penalite;
+}
 
     /**
      * Créer un objet Emprunt à partir de ResultSet

@@ -101,7 +101,7 @@ public class DocumentDAO {
                 rs.getString("nom"),
                 rs.getString("description"),
                 rs.getInt("numero"),
-                Periodite.valueOf(rs.getString("periodite"))
+                Periodite.valueOf(rs.getString("periodite").toUpperCase())
           );
              return document;
 
@@ -438,7 +438,7 @@ public class DocumentDAO {
             rs.getString("nom"),
             rs.getString("description"),
             rs.getInt("numero"),
-            Periodite.valueOf(rs.getString("periodite"))
+            Periodite.valueOf(rs.getString("periodite").toUpperCase())
         );
         return magazine;
     }

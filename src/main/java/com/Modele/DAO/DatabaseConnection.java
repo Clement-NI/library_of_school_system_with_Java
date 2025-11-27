@@ -117,16 +117,43 @@ public class DatabaseConnection {
                     "FROM document d " +
                     "LEFT JOIN livres l ON d.id = l.id " +
                     "LEFT JOIN magazine m ON d.id = m.id"
-);
+            );
             System.out.println("Vue 'document_view' créée avec succès");
 
+            conn.createStatement().execute(
+                "CREATE VIEW IF NOT EXISTS adherent_view AS " +
+                "SELECT " +
+                "    A.id, " +
+                "    A.nom, " +
+                "    A.prenom, " +
+                "    ROUND(" +
+                "        COALESCE(" +
+                "            0.5 * SUM(" +
+                "                julianday('now') - " +
+                "                julianday(datetime(E.dateRetourPrevue / 1000, 'unixepoch'))" +
+                "            ), " +
+                "            0" +
+                "        ), " +
+                "        2" +
+                "    ) AS penalite " +
+                "FROM Adherent A " +
+                "LEFT JOIN Emprunt E ON A.id = E.adherent_id " +
+                "    AND datetime(E.dateRetourPrevue / 1000, 'unixepoch') < datetime('now') " +
+                "    AND E.dateRetourReelle IS NULL " +
+                "GROUP BY A.id, A.nom, A.prenom"
+            );
+        System.out.println("Vue 'adherent_view' créée avec succès");
 
-            System.out.println("\n Initialisation de la base de données réussie! Fichier: bibliotheque.db");
+
+        System.out.println("\n Initialisation de la base de données réussie! Fichier: bibliotheque.db");
 
         } catch (SQLException e) {
             System.err.println(" Échec de l'initialisation de la base de données: " + e.getMessage());
             e.printStackTrace();
         }
+
+
+
     }
 
     /**

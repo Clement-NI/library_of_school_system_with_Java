@@ -448,7 +448,6 @@ public class BibliotequeManager {
 
     public ArrayList<Emprunt> obtenirTousLesEmprunts() {
         try {
-            this.obtenirEmpruntsEnRetard();
             return empruntDAO.obtenirTous();
         } catch (SQLException e) {
             System.err.println("Erreur lors du chargement: " + e.getMessage());
@@ -458,7 +457,6 @@ public class BibliotequeManager {
 
     public ArrayList<Emprunt> obtenirEmpruntsAdherent(int adherentId) {
         try {
-            this.obtenirEmpruntsEnRetard();
             return empruntDAO.obtenirEmpruntsParAdherent(adherentId);
         } catch (SQLException e) {
             System.err.println("Erreur lors du chargement: " + e.getMessage());
@@ -468,7 +466,6 @@ public class BibliotequeManager {
 
     public ArrayList<Emprunt> obtenirEmpruntsNonRetournes() {
         try {
-            this.obtenirEmpruntsEnRetard();
             return empruntDAO.obtenirEmpruntsNonRetournes();
         } catch (SQLException e) {
             System.err.println("✗ Erreur lors du chargement: " + e.getMessage());
@@ -476,28 +473,15 @@ public class BibliotequeManager {
         }
     }
 
-    private int calculerJoursEnRetard(Emprunt emprunt, Date aujourdhui) {
-            long dateRetourPrevueMs = emprunt.getDateRetourPrevue().getTime();
-            long aujourdhuiMs = aujourdhui.getTime();
-            long differenceMs = aujourdhuiMs - dateRetourPrevueMs;
-            return (int) (differenceMs / (24 * 60 * 60 * 1000));
-    }
 
     public ArrayList<Emprunt> obtenirEmpruntsEnRetard() {
-        int jour_de_retard;
         try {
             ArrayList<Emprunt> emprunts = empruntDAO.obtenirEmpruntsEnRetard();
-            for(Emprunt emprunt : emprunts){
-                jour_de_retard = calculerJoursEnRetard(emprunt,new Date());
-                emprunt.modifyStatusAdherent(jour_de_retard);
-                adherentDAO.modifier(emprunt.getAdherent());
             return emprunts;
-         }
         } catch (SQLException e) {
             System.err.println("✗ Erreur lors du chargement: " + e.getMessage());
             return new ArrayList<>();
         }
-        return new ArrayList<>();
     }
 
     public ArrayList<Emprunt> obtenirEmpruntsEnRetardAdherent(int adherentId) {
@@ -586,5 +570,16 @@ public class BibliotequeManager {
     } catch (SQLException e) {
         System.err.println("Erreur lors de la modification de l'emprunt: " + e.getMessage());
     }
-}
+    }
+
+    public double getPenaliteParEmprunt(int empruntId) {
+        try {
+             return empruntDAO.getPenaliteParEmprunt(empruntId);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+        return 0.0;
+
+    }
 }

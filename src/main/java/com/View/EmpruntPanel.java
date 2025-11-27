@@ -198,9 +198,12 @@ public class EmpruntPanel extends JPanel {
         }
 
         int empruntId = (int) tableModel.getValueAt(selectedRow, 0);
+        double penalite = manager.getPenaliteParEmprunt(empruntId);
+
+                // Confirmer l'action
         int confirm = JOptionPane.showConfirmDialog(this,
-            "Êtes-vous sûr de vouloir enregistrer le retour?",
-            "Confirmation", JOptionPane.YES_NO_OPTION);
+                    "L'adherent doit payer une penalite de " + penalite +" euros.\nVoulez-vous enregistrer le retour de cet emprunt?",
+                    "Confirmation", JOptionPane.YES_NO_OPTION);
 
         if (confirm == JOptionPane.YES_OPTION) {
             manager.enregistrerRetour(empruntId);

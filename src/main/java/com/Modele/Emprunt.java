@@ -51,9 +51,6 @@ public class Emprunt {
         this.ID_Emprunt = ID_Emprunt;
     }
 
-    public void modifyStatusAdherent(int jour_de_retard){
-            this.adherent.setStatut_Adherent(max(0.5 * jour_de_retard,adherent.getStatutPenalite()));
-    }
 
     @Override
     public String toString() {

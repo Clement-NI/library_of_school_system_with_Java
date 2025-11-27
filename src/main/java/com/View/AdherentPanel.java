@@ -6,6 +6,7 @@ import com.Modele.Emprunt;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 /**
@@ -18,6 +19,7 @@ public class AdherentPanel extends JPanel {
     private JTextField nomField;
     private JTextField prenomField;
     private JTextField searchField;
+    private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
     public AdherentPanel(BibliotequeManager manager) {
         this.manager = manager;
@@ -116,9 +118,6 @@ public class AdherentPanel extends JPanel {
         histoButton.addActionListener(e->showHistorique());
         panel.add(histoButton);
 
-        JButton effacerButton = new JButton("Effacer Penalite");
-        effacerButton.addActionListener(e->effacerPenalte());
-        panel.add(effacerButton);
 
         JButton refreshButton = new JButton("Rafraîchir");
         refreshButton.addActionListener(e -> refreshTable());
@@ -171,7 +170,6 @@ public class AdherentPanel extends JPanel {
         panel.add(nomField);
         panel.add(new JLabel("Prénom:"));
         panel.add(prenomField);
-        //panel.add(new JLabel("Penalite");
 
 
 
@@ -198,63 +196,119 @@ public class AdherentPanel extends JPanel {
     }
 
     private void showHistorique(){
-    // Vérifier qu'un adhérent est sélectionné
-    int selectedRow = table.getSelectedRow();
-    if (selectedRow == -1) {
-        JOptionPane.showMessageDialog(this, "Veuillez sélectionner un adhérent",
-            "Erreur", JOptionPane.ERROR_MESSAGE);
-        return;
+            // Vérifier qu'un adhérent est sélectionné
+            int selectedRow = table.getSelectedRow();
+            if (selectedRow == -1) {
+                JOptionPane.showMessageDialog(this, "Veuillez sélectionner un adhérent",
+                    "Erreur", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // Récupérer l'ID de l'adhérent sélectionné
+            int id = (int) tableModel.getValueAt(selectedRow, 0);
+
+            // Obtenir les emprunts de l'adhérent
+            ArrayList<Emprunt> emprunts = manager.obtenirEmpruntsAdherent(id);
+
+            // Créer un nouveau modèle de table pour l'historique
+            DefaultTableModel historiqueTableModel = new DefaultTableModel(
+                new String[]{"ID Emprunt", "Document", "Date Emprunt", "Date Retour Prevue", "Date Retour Réelle"}, 0
+            ) {
+                @Override
+                public boolean isCellEditable(int row, int column) {
+                    return false;
+                }
+            };
+
+            // Remplir le modèle avec les données des emprunts
+            for (Emprunt emprunt : emprunts) {
+                if(emprunt.getDocument() == null){
+                    continue;
+                }
+
+                String dateRetourReelle = emprunt.getDateRetourReelle() != null ?
+                        dateFormat.format(emprunt.getDateRetourReelle()) : "N/A";
+                historiqueTableModel.addRow(new Object[]{
+                    emprunt.getID_Emprunt(),
+                    emprunt.getDocument().getNom(),
+                    dateFormat.format(emprunt.getDateEmprunt()),
+                    dateFormat.format(emprunt.getDateRetourPrevue()),
+                    dateRetourReelle
+                });
+            }
+
+            // Créer une nouvelle table pour l'historique
+            JTable historiqueTable = new JTable(historiqueTableModel);
+            historiqueTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+            JScrollPane scrollPane = new JScrollPane(historiqueTable);
+
+            // Créer un panneau pour l'historique
+            JPanel historiquePanel = new JPanel(new BorderLayout());
+            historiquePanel.add(new JLabel("Historique d'emprunt de l'adhérent ID: " + id),
+                                BorderLayout.NORTH);
+            historiquePanel.add(scrollPane, BorderLayout.CENTER);
+
+            // Créer un panneau pour le bouton (AVANT de créer le dialog)
+            JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+            JButton retourButton = new JButton("Enregistrer retour");
+
+            // Action du bouton avec accès à la table d'historique
+            retourButton.addActionListener(e -> {
+                int selectedHistoRow = historiqueTable.getSelectedRow();
+                if (selectedHistoRow == -1) {
+                    JOptionPane.showMessageDialog(historiquePanel,
+                        "Veuillez sélectionner un emprunt dans l'historique",
+                        "Erreur", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                // Récupérer l'ID de l'emprunt sélectionné
+                int idEmprunt = (int) historiqueTableModel.getValueAt(selectedHistoRow, 0);
+
+                // Vérifier si le retour n'a pas déjà été enregistré
+                String dateRetourReelle = (String) historiqueTableModel.getValueAt(selectedHistoRow, 4);
+                if (!dateRetourReelle.equals("N/A")) {
+                    JOptionPane.showMessageDialog(historiquePanel,
+                        "Le retour de cet emprunt a déjà été enregistré le " + dateRetourReelle,
+                        "Information", JOptionPane.INFORMATION_MESSAGE);
+                    return;
+                }
+
+                double penalite = manager.getPenaliteParEmprunt(idEmprunt);
+
+                // Confirmer l'action
+                int confirm = JOptionPane.showConfirmDialog(historiquePanel,
+                    "L'adherent doit payer une penalite de " + penalite +" euros.\nVoulez-vous enregistrer le retour de cet emprunt?",
+                    "Confirmation", JOptionPane.YES_NO_OPTION);
+
+                if (confirm == JOptionPane.YES_OPTION) {
+                    // Appeler la méthode du manager pour enregistrer le retour
+                    manager.enregistrerRetour(idEmprunt);
+
+                    JOptionPane.showMessageDialog(historiquePanel,
+                        "Retour enregistré avec succès",
+                        "Succès", JOptionPane.INFORMATION_MESSAGE);
+
+                    // Rafraîchir l'historique
+                    historiqueTableModel.setValueAt(dateFormat.format(new java.util.Date()),
+                                                   selectedHistoRow, 4);
+
+                    // Rafraîchir le tableau principal des adhérents
+                    refreshTable();
+                }
+            });
+
+            buttonPanel.add(retourButton);
+            historiquePanel.add(buttonPanel, BorderLayout.SOUTH);
+
+            // Afficher dans une nouvelle fenêtre ou un dialogue
+            JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this),
+                                          "Historique des emprunts", true);
+            dialog.setContentPane(historiquePanel);
+            dialog.setSize(700, 450);
+            dialog.setLocationRelativeTo(this);
+            dialog.setVisible(true);
     }
-
-    // Récupérer l'ID de l'adhérent sélectionné
-    int id = (int) tableModel.getValueAt(selectedRow, 0);
-
-    // Obtenir les emprunts de l'adhérent
-    ArrayList<Emprunt> emprunts = manager.obtenirEmpruntsAdherent(id);
-
-    // Créer un nouveau modèle de table pour l'historique
-    DefaultTableModel historiqueTableModel = new DefaultTableModel(
-        new String[]{"ID Emprunt", "Document", "Date Emprunt", "Date Retour Prevue", "Date Retour Relle"}, 0
-    ) {
-        @Override
-        public boolean isCellEditable(int row, int column) {
-            return false;
-        }
-    };
-
-    // Remplir le modèle avec les données des emprunts
-    for (Emprunt emprunt : emprunts) {
-        if(emprunt.getDocument() == null){
-            continue;
-        }
-        historiqueTableModel.addRow(new Object[]{
-            emprunt.getID_Emprunt(),
-            emprunt.getDocument().getNom(), // ou getNom() selon votre classe
-            emprunt.getDateEmprunt(),
-            emprunt.getDateRetourPrevue(),
-            emprunt.getDateRetourReelle()// ou une méthode pour vérifier si retourné
-        });
-    }
-
-    // Créer une nouvelle table pour l'historique
-    JTable historiqueTable = new JTable(historiqueTableModel);
-    historiqueTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-    JScrollPane scrollPane = new JScrollPane(historiqueTable);
-
-    // Créer un panneau pour l'historique
-    JPanel historiquePanel = new JPanel(new BorderLayout());
-    historiquePanel.add(new JLabel("Historique d'emprunt de l'adhérent ID: " + id),
-                        BorderLayout.NORTH);
-    historiquePanel.add(scrollPane, BorderLayout.CENTER);
-
-    // Afficher dans une nouvelle fenêtre ou un dialogue
-    JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this),
-                                  "Historique des emprunts", true);
-    dialog.setContentPane(historiquePanel);
-    dialog.setSize(600, 400);
-    dialog.setLocationRelativeTo(this);
-    dialog.setVisible(true);
-}
 
     private void supprimerAdherent() {
         int selectedRow = table.getSelectedRow();
@@ -313,26 +367,7 @@ public class AdherentPanel extends JPanel {
             "Statistiques", JOptionPane.INFORMATION_MESSAGE);
     }
 
-    private void effacerPenalte(){
-         int selectedRow = table.getSelectedRow();
-        if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Veuillez sélectionner un adhérent",
-                "Erreur", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
 
-        int id = (int) tableModel.getValueAt(selectedRow, 0);
-        int confirm = JOptionPane.showConfirmDialog(this,
-            "Êtes-vous sûr de vouloir effacer la penalite de cet adhérent?",
-            "Confirmation", JOptionPane.YES_NO_OPTION);
-
-        if (confirm == JOptionPane.YES_OPTION) {
-            manager.effacerPenalite(id);
-            refreshTable();
-            JOptionPane.showMessageDialog(this, "La penalite de cet adhérent efface avec succès",
-                "Succès", JOptionPane.INFORMATION_MESSAGE);
-        }
-    }
 }
 
 
