@@ -14,12 +14,24 @@ import java.util.Date;
  * Responsable de toutes les interactions avec la table des emprunts
  */
 public class EmpruntDAO {
+    public boolean peutEmprunter(int adherentId) throws SQLException {
+            String sql = "SELECT COUNT(*) as nb " +
+                         "FROM Emprunt " +
+                         "WHERE adherent_id = ? AND dateRetourReelle IS NULL";
 
-    /**
-     * Ajouter un nouvel enregistrement d'emprunt à la base de données
-     * @param emprunt objet Emprunt à ajouter
-     * @throws SQLException exception de la base de données
-     */
+            try (   Connection conn = DatabaseConnection.getConnection();
+                    PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                pstmt.setInt(1, adherentId);
+                ResultSet rs = pstmt.executeQuery();
+
+                if (rs.next()) {
+                    int nbEmprunts = rs.getInt("nb");
+                    return nbEmprunts < 5;
+                }
+            }
+            return false;
+    }
+
     public void ajouter(Emprunt emprunt) throws SQLException {
         String sql = "INSERT INTO emprunt (document_id, adherent_id, dateEmprunt, dateRetourPrevue) " +
                      "VALUES (?, ?, ?, ?)";

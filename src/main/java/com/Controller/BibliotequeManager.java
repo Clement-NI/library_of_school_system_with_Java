@@ -120,15 +120,14 @@ public class BibliotequeManager {
 
     }
 
-    public void effacerPenalite(int id){
-        try {
-             adherentDAO.effacerPenalite(id);
+    public boolean EstEnPenalite(int id){
+        try{
+            return adherentDAO.EstenPenalite(id);
         }catch (Exception e) {
             e.printStackTrace();
+            return false;
         }
-
     }
-
     // =============== Document =====================
     public void ajouterDocument(String nom, String description, String isbn, int nbpages,String type_de_document){
         if(type_de_document.equals("livre")){
@@ -198,6 +197,16 @@ public class BibliotequeManager {
         return new ArrayList<Document>();
     }
 
+    public boolean EstDisponible(int id){
+        try {
+            return documentDAO.EstDisponible(id);
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+        return true;
+
+    }
+
 
 
     // ========== LIVRE ==========
@@ -249,6 +258,8 @@ public class BibliotequeManager {
             System.err.println("✗ Erreur lors de la modification: " + e.getMessage());
         }
     }
+
+
 
 
     public void supprimerLivre(int id) {
@@ -404,6 +415,16 @@ public class BibliotequeManager {
     }
 
     // ========== EMPRUNT ==========
+    public boolean peutEmprunt(int adherentID){
+        try {
+            return empruntDAO.peutEmprunter(adherentID);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return false;
+
+    }
+
     public Emprunt creerEmprunt(int adherentId, int documentId, Date dateRetourPrevue) {
         try {
             Adherent adherent = adherentDAO.rechercherParId(adherentId);

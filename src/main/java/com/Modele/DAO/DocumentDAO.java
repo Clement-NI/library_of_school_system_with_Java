@@ -450,6 +450,31 @@ public class DocumentDAO {
         return compterLivres() + compterMagazines();
     }
 
+    public boolean EstDisponible(int documentId) throws SQLException {
+    // Vérifier si le document est actuellement emprunté (pas encore retourné)
+    String sql = "SELECT * FROM Emprunt WHERE document_id = ? AND dateRetourReelle IS NULL";
+
+    try (Connection conn = DatabaseConnection.getConnection();
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+        stmt.setInt(1, documentId);
+
+        try (ResultSet rs = stmt.executeQuery()) {
+            // Si un résultat existe = document emprunté = NON disponible
+            if (rs.next()) {
+                return false; // Document emprunté, pas disponible
+            }
+        }
+
+        return true; // Aucun emprunt actif = disponible
+
+    } catch (SQLException e) {
+        e.printStackTrace();
+        throw e; // Relancer l'exception au lieu de retourner true
+    }
+}
+
+
 
 
 }

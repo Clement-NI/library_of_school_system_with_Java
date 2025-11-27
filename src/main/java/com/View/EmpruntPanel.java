@@ -171,6 +171,26 @@ public class EmpruntPanel extends JPanel {
             return;
         }
 
+        //Verification
+        if(!manager.peutEmprunt(adherentId)){
+            JOptionPane.showMessageDialog(this, "Un adherent ne peut pas emprunter plus de 5 documents",
+                "Erreur", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        if(manager.EstEnPenalite(adherentId)){
+                     JOptionPane.showMessageDialog(this, "Un adherent en penalite ne peut pas effectuer l'emprunt ! ",
+                "Erreur", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        if(!manager.EstDisponible(documentId)){
+            JOptionPane.showMessageDialog(this, "Ce document n'est pas disponible ! ",
+                "Erreur", JOptionPane.ERROR_MESSAGE);
+            return;
+
+        }
+
         Emprunt emprunt = manager.creerEmprunt(adherentId, documentId, dateRetourPrevue);
 
         if (emprunt != null) {

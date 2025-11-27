@@ -145,6 +145,8 @@ public class DatabaseConnection {
         System.out.println("Vue 'adherent_view' créée avec succès");
 
 
+
+
         System.out.println("\n Initialisation de la base de données réussie! Fichier: bibliotheque.db");
 
         } catch (SQLException e) {

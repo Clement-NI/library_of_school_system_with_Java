@@ -122,13 +122,32 @@ public class AdherentDAO {
         return 0;
     }
 
-    public void effacerPenalite(int id) throws  SQLException{
-        String sql = "UPDATE adherent SET statutPenalite = 0 WHERE id = ?";
-                try (Connection conn = DatabaseConnection.getConnection();
-        PreparedStatement stmt = conn.prepareStatement(sql)) {
-                    stmt.setInt(1,id);
-                    stmt.executeUpdate();
+    public double obtenirPenalite(int id) throws SQLException {
+            String sql = "SELECT penalite FROM adherent_view WHERE id = ?";
+
+            try (Connection conn = DatabaseConnection.getConnection();
+                 PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+                stmt.setInt(1, id);
+
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getDouble("penalite");
+                    }
                 }
+
+                return 0.0; // Adhérent non trouvé ou pas de pénalité
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+                throw e;
+            }
+        }
+
+        // Utilisation
+
+    public boolean EstenPenalite(int id) throws SQLException {
+            return obtenirPenalite(id) > 0;
     }
 
 }
