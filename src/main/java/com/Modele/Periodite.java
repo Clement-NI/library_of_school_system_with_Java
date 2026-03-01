@@ -1,6 +1,5 @@
 package com.Modele;
 
-// Enum定义在类外面
 public enum Periodite {
     SEMAINE("semaine"),
     HEBDOMATAIRE("hebdomataire"),
